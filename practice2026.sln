@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "task14", "task14\task14.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "task14tests", "task14tests\task14tests.csproj", "{AD5BF468-3799-464F-96C2-DC07C2A535F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceAnalyzer", "PerformanceAnalyzer\PerformanceAnalyzer.csproj", "{4299C455-AE93-4002-8F56-AA9311E718CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{AD5BF468-3799-464F-96C2-DC07C2A535F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD5BF468-3799-464F-96C2-DC07C2A535F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD5BF468-3799-464F-96C2-DC07C2A535F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4299C455-AE93-4002-8F56-AA9311E718CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4299C455-AE93-4002-8F56-AA9311E718CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4299C455-AE93-4002-8F56-AA9311E718CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4299C455-AE93-4002-8F56-AA9311E718CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

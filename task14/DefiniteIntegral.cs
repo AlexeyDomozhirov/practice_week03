@@ -6,6 +6,30 @@ using System.Threading;
 
 public class DefiniteIntegral
 {
+    public static double SolveInOneThread(double a, double b, Func<double, double> function, double step)
+    {
+        if (step <= 0)
+            throw new ArgumentException("Шаг должен быть > 0", nameof(step));
+        if (function == null)
+            throw new ArgumentException("Null функция", nameof(function));
+    
+        double sign = 1.0;
+        if (a > b)
+        {
+            (a, b) = (b, a);
+            sign = -1.0;
+        }
+    
+        double length = b - a;
+        long N = (long)Math.Round(length / step);
+    
+        if (N <= 0)
+            return sign * (b - a) * (function(a) + function(b)) / 2.0;
+    
+        double sum = ComputePartialSum(a, step, function, 0, N);
+        return sign * sum;
+    }
+
     public static double Solve(double a, double b, Func<double, double> function,
                                double step, int threadsnumber)
     {
