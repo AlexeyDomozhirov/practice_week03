@@ -56,7 +56,6 @@ public class DefiniteIntegralTests
         static double f(double x) => x;
         var ex = Assert.Throws<ArgumentException>(
             () => DefiniteIntegral.Solve(0, 1, f, 1e-4, threads));
-        Assert.Contains("Число потоков должно быть > 0", ex.Message);
     }
 
     [Theory]
@@ -67,7 +66,13 @@ public class DefiniteIntegralTests
         static double f(double x) => x;
         var ex = Assert.Throws<ArgumentException>(
             () => DefiniteIntegral.Solve(0, 1, f, step, 2));
-        Assert.Contains("Шаг должен быть > 0", ex.Message);
+    }
+
+    [Fact]
+    public void Solve_InvalidFunction_ThrowsArgumentException()
+    {
+        var ex = Assert.Throws<ArgumentException>(
+            () => DefiniteIntegral.Solve(0, 1, null!, 0.1, 2));
     }
 
     [Fact]

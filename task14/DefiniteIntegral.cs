@@ -13,6 +13,8 @@ public class DefiniteIntegral
             throw new ArgumentException("Число потоков должно быть > 0", nameof(threadsnumber));
         if (step <= 0)
             throw new ArgumentException("Шаг должен быть > 0", nameof(step));
+	if (function == null)
+	    throw new ArgumentException("Null функция", nameof(function));
 
         double sign = 1.0;
         if (a > b)
