@@ -1,12 +1,9 @@
-﻿using System;
-using task14;
+﻿using task14;
 using System.Diagnostics;
-using System.Linq;
 using ScottPlot;
 
 class Program
 {
-    // Вспомогательный метод для измерения времени выполнения
     static (double timeMs, double result) Measure(Action act, int warmup = 2, int runs = 5)
     {
         for (int i = 0; i < warmup; i++) act();
@@ -20,28 +17,29 @@ class Program
     {
         double a = -100, b = 100;
         Func<double, double> sin = Math.Sin;
-        double exact = 0.0; // интеграл sin(x) на [-100,100] равен 0
+        double exact = 0.0;
 
-        // 1. Определение оптимального шага (наибольший, дающий точность 1e-4)
-        double[] steps = { 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6 };
+	//1e-1 был намерен убран из списка. Так как определенный интеграл от синуса на симметричном отрезке
+	//всегда будет равен нулю => любой шаг будет давать отличную точность => программа выберет шаг 1e-1
+	//но он даст всего 2000 отрезков, что слишком мало для честного сравнения многопоточного решения и
+	//однопоточное из-за больших накладных расходов на создание потоков
+        double[] steps = { 1e-2, 1e-3, 1e-4, 1e-5, 1e-6 };
         Console.WriteLine("Шаг        | Время (мс)    | Погрешность");
         double stepOpt = steps[0];
         foreach (var step in steps)
         {
             var (time, res) = Measure(() => DefiniteIntegral.Solve(a, b, sin, step, 1), 2, 5);
-            Console.WriteLine($"{res:F19}"); // Вывод: 3.14
+            Console.WriteLine($"{res:F19}");
             double error = Math.Abs(res - exact);
             Console.WriteLine($"{step,6:E1}   | {time,12:F4}   | {error,12:E2}");
-            // Выбираем первый (самый крупный) шаг, обеспечивающий точность
             if (error <= 1e-4)
             {
                 stepOpt = step;
-                break; // прекращаем перебор, так как идём от крупного к мелкому
+                break;
             }
         }
         Console.WriteLine($"\nВыбран шаг: {stepOpt} (интервалов: {(b - a) / stepOpt:F0})");
 
-        // 2. Подбор оптимального числа потоков
         int maxThreads = Environment.ProcessorCount * 2;
         int[] threadCounts = Enumerable.Range(1, maxThreads).ToArray();
         double[] multiTimes = new double[maxThreads];
@@ -55,7 +53,6 @@ class Program
             Console.WriteLine($"{threads,7} | {time,11:F4}");
         }
 
-        // 3. Сравнение с однопоточной версией (без потоков)
         var (singleTime, _) = Measure(() => DefiniteIntegral.SolveInOneThread(a, b, sin, stepOpt), 5, 10);
         double minMultiTime = multiTimes.Min();
         int bestThreads = threadCounts[Array.IndexOf(multiTimes, minMultiTime)];
@@ -65,10 +62,8 @@ class Program
         Console.WriteLine($"Лучшая многопоточная: {minMultiTime:F4} мс ({bestThreads} потоков)");
         Console.WriteLine($"Ускорение: {gain:F2}%");
 
-        // 4. Построение графика (по заданию: OX – время, OY – число потоков)
         var plt = new Plot();
 
-        // Точки многопоточных замеров: X = время, Y = число потоков
         var xs = multiTimes.Select(t => (double)t).ToArray();
         var ys = threadCounts.Select(t => (double)t).ToArray();
         var scatter = plt.Add.Scatter(xs, ys);
@@ -76,7 +71,6 @@ class Program
         scatter.MarkerSize = 5;
         scatter.LegendText = "Многопоточная";
 
-        // Вертикальная линия для однопоточного времени
         var vLine = plt.Add.VerticalLine(singleTime);
         vLine.Color = Colors.Red;
         vLine.LinePattern = LinePattern.Dashed;
@@ -92,9 +86,8 @@ class Program
         plt.SavePng(plotPath, 800, 600);
         Console.WriteLine($"\nГрафик сохранён в {plotPath}");
 
-        // 5. Формирование отчёта
         string report = $@"
-           Оптимальный шаг (наибольший, дающий точность 1e-4): {stepOpt}
+           Оптимальный шаг: {stepOpt}
            Число интервалов: {(b - a) / stepOpt:F0}
            Однопоточное время (без потоков): {singleTime:F4} мс
            Лучшее многопоточное время: {minMultiTime:F4} мс (потоков: {bestThreads})
