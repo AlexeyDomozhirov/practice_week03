@@ -4,13 +4,24 @@ using ScottPlot;
 
 class Program
 {
-    static (double timeMs, double result) Measure(Action act, int warmup = 2, int runs = 5)
+    public static (double timeMs, double avgResult) Measure(
+        Func<double> act, int warmup = 2, int runs = 5)
     {
-        for (int i = 0; i < warmup; i++) act();
+        for (int i = 0; i < warmup; i++)
+            act();
+    
         var sw = Stopwatch.StartNew();
-        for (int i = 0; i < runs; i++) act();
+        double sum = 0.0;
+        for (int i = 0; i < runs; i++)
+        {
+            sum += act();
+        }
         sw.Stop();
-        return (sw.Elapsed.TotalMilliseconds / runs, 0);
+    
+        double avgTime = sw.Elapsed.TotalMilliseconds / runs;
+        double avgResult = sum / runs;
+    
+        return (avgTime, avgResult);
     }
 
     static void Main()
@@ -19,10 +30,6 @@ class Program
         Func<double, double> sin = Math.Sin;
         double exact = 0.0;
 
-        //1e-1 был намерен убран из списка. Так как определенный интеграл от синуса на симметричном отрезке
-        //всегда будет равен нулю => любой шаг будет давать отличную точность => программа выберет шаг 1e-1
-        //но он даст всего 2000 отрезков, что слишком мало для честного сравнения многопоточного решения и
-        //однопоточное из-за больших накладных расходов на создание потоков
         double[] steps = { 1e-2, 1e-3, 1e-4, 1e-5, 1e-6 };
         Console.WriteLine("Шаг        | Время (мс)    | Погрешность");
         double stepOpt = steps[0];
