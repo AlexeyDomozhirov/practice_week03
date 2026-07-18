@@ -43,12 +43,12 @@ public class DefiniteIntegral
             {
                 new Thread(() =>
                 {
-		    try
-		    {
+                    try
+                    {
                         long start = i * baseCount + Math.Min(i, remainder);
                         long count = baseCount + (i < remainder ? 1 : 0);
                         double localSum = ComputePartialSum(a, step, function, start, count);
-		        
+                        
                         double initial, computed;
                         do
                         {
@@ -56,15 +56,15 @@ public class DefiniteIntegral
                             computed = initial + localSum;
                         }
                         while (Interlocked.CompareExchange(ref totalSum, computed, initial) != initial);
-		    }
-		    catch(Exception ex)
-		    {
+                    }
+                    catch(Exception ex)
+                    {
                         exceptions.Add(ex);
-		    }
-		    finally
-		    {
+                    }
+                    finally
+                    {
                         barrier.SignalAndWait();
-		    }
+                    }
                 }).Start();
             }
 
