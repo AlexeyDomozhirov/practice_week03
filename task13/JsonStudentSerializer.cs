@@ -58,7 +58,7 @@ public static class JsonStudentSerializer
             throw new ArgumentException("FirstName не может быть пустым.");
         if (string.IsNullOrWhiteSpace(student.LastName))
             throw new ArgumentException("LastName не может быть пустым.");
-        if (student.BirthDate > DateTime.Now)
+        if (student.BirthDate > DateTime.Today)
             throw new ArgumentException("Дата рождения не может быть в будущем.");
         if (student.Grades == null)
             throw new ArgumentException("Список оценок не может быть null.");
