@@ -1,6 +1,7 @@
 ﻿namespace task14;
 
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 
@@ -25,6 +26,7 @@ public class DefiniteIntegral
 
         double length = b - a;
         long N = (long)Math.Round(length / step);
+        var exceptions = new ConcurrentBag<Exception>();
 
         if (N <= 0)
             return sign * (b - a) * (function(a) + function(b)) / 2.0;
@@ -41,23 +43,37 @@ public class DefiniteIntegral
             {
                 new Thread(() =>
                 {
-                    long start = i * baseCount + Math.Min(i, remainder);
-                    long count = baseCount + (i < remainder ? 1 : 0);
-                    double localSum = ComputePartialSum(a, step, function, start, count);
-
-                    double initial, computed;
-                    do
-                    {
-                        initial = totalSum;
-                        computed = initial + localSum;
-                    }
-                    while (Interlocked.CompareExchange(ref totalSum, computed, initial) != initial);
-
-                    barrier.SignalAndWait();
+		    try
+		    {
+                        long start = i * baseCount + Math.Min(i, remainder);
+                        long count = baseCount + (i < remainder ? 1 : 0);
+                        double localSum = ComputePartialSum(a, step, function, start, count);
+		        
+                        double initial, computed;
+                        do
+                        {
+                            initial = totalSum;
+                            computed = initial + localSum;
+                        }
+                        while (Interlocked.CompareExchange(ref totalSum, computed, initial) != initial);
+		    }
+		    catch(Exception ex)
+		    {
+                        exceptions.Add(ex);
+		    }
+		    finally
+		    {
+                        barrier.SignalAndWait();
+		    }
                 }).Start();
             }
 
             barrier.SignalAndWait();
+            if (!exceptions.IsEmpty)
+            {
+                throw new AggregateException(exceptions);
+            }
+
             return sign * totalSum;
         }
     }
